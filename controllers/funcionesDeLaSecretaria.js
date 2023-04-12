@@ -569,6 +569,42 @@ const allDocentes = (req, res) => {
     }
 }
 
+// traer todos los salones
+const allSalones = (req, res) => {
+
+    const role = req.userRole
+
+    if(role == 'secretaria'){
+        Salon.find().populate('director').then((datos) => {
+
+            if(datos){
+                res.status(200).json({
+                    status: 200,
+                    mensaje: 'salones',
+                    datos
+                })
+            }else {
+                res.status(404).json({
+                    status: 404,
+                    mensaje: 'No hay salones'
+                })
+            }
+        })
+        .catch((e) => {
+            res.status(500).json({
+                status: 500,
+                mensaje: 'Error al buscar los salones',
+                e
+            })
+        })
+    }else {
+        res.status(400).json({
+            status: 400,
+            mensaje: 'No puedes acceder a esta funcion'
+        })
+    }
+}
+
 module.exports = {
     agregarPeriodo,
     agregarClase,
@@ -583,5 +619,6 @@ module.exports = {
     fechaRegistro,
     matricular,
     rechazarAspirante,
-    allDocentes
+    allDocentes,
+    allSalones
 }
