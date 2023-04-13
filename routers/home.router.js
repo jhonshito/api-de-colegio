@@ -15,7 +15,7 @@ router.get('/grados', verificarToken, listGrado);
 router.post('/agregarPeriodo', verificarToken, agregarPeriodo);
 router.post('/agregarClase', verificarToken, agregarClase);
 router.get('/periodos', verificarToken, periodos);
-router.get('/clases', verificarToken, clases);
+router.get('/clases/:id', verificarToken, clases);
 router.post('/agregarDocente/:profesorId', verificarToken, agregarDocenteAlaClase);
 router.post('/crearSalon', verificarToken, crearSalon);
 router.put('/directorDeSalon/:profesorId', verificarToken, agregarDirectorDelSalon);

@@ -2,6 +2,7 @@ const { Periodo, Clase, Salon, Docente, Usuario } = require('../models/models');
 const transporter = require("../config/mailer")
 const moment = require('moment');
 
+// crear periodo
 const agregarPeriodo = (req, res) => {
     const { nombre, inicio, fin } = req.body;
 
@@ -84,6 +85,7 @@ const agregarClase = (req, res) => {
     }
 };
 
+// traer periodos
 const periodos = (req, res) => {
     const role = req.userRole
 
@@ -110,50 +112,58 @@ const periodos = (req, res) => {
     }
 };
 
+// traer todos los clases del periodo seleccionado
 const clases = (req, res) => {
-    const { id } = req.body
+    const {id} = req.params
     const role = req.userRole
 
-    if(role !== 'estudiante'){
-        Periodo.findById(id).populate('clases').then((periodo) => {
-            if(periodo){
-                res.status(200).json({
-                    mensaje: 'Clases del periodo obtenidas exitosamente',
-                    clases: periodo.clases
+    if (role !== 'estudiante') {
+        Periodo.findById(id)
+            .populate({
+                path: 'clases',
+                populate: {
+                    path: 'profesor',
+                }
+            })
+            .then((periodo) => {
+                if (periodo) {
+                    res.status(200).json({
+                        mensaje: 'Clases del periodo obtenidas exitosamente',
+                        clases: periodo.clases
+                    });
+                } else {
+                    res.status(404).json({
+                        mensaje: 'No se encontró el período con el ID especificado'
+                    });
+                }
+            })
+            .catch((e) => {
+                res.status(500).json({
+                    mensaje: 'Error al obtener las clases del período',
+                    error: e
                 });
-            }else {
-                res.status(404).json({
-                    mensaje: 'No se encontró el período con el ID especificado'
-                });
-            }
-        })
-        .catch((e) => {
-            res.status(500).json({
-                mensaje: 'Error al obtener las clases del período',
-                error: error
             });
-        })
-    }else {
+    } else {
         res.status(400).json({
-            mensaje: 'No puedes acceder a esta funcion'
-        })
+            mensaje: 'No puedes acceder a esta función'
+        });
     }
 };
 
 const agregarDocenteAlaClase = (req, res) => {
 
     const { id } = req.body
-    const profesorId = req.body.profesorId;
+    const profesorId = req.params.profesorId;
     const role = req.userRole
 
     if(role !== 'estudiante'){
         Clase.findById(id).then((clase) => {
             if(clase){
                 clase.profesor = profesorId
-                clase.save().then(() => {
+                clase.save().then((nuevaClase) => {
                     res.status(200).json({
                         mensaje: 'Profesor agregado exitosamente a la clase',
-                        clase: clase
+                        clase: nuevaClase
                     });
                 })
                 .catch((e) => {
