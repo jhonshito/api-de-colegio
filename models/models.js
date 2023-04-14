@@ -170,17 +170,52 @@ const salonSchema = new Schema({
     estudiantes: [{type: mongoose.Schema.Types.ObjectId, ref: 'users'}]
 })
 
+const gradoSchema = new Schema({
+    nombre: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    director_de_grupo: {type: mongoose.Schema.Types.ObjectId, ref: 'docentes'},
+    estudiantes: [{type: mongoose.Schema.Types.ObjectId, ref: 'users'}]
+})
+
+const añoLetivoSchama = new Schema({
+    nombre: {
+        type: String,
+        required: true
+    },
+    jornada: {
+        type: String,
+        required: true
+    },
+    inicio: {
+        type: Date,
+        required: true
+    },
+    fin: {
+        type: Date,
+        required: true
+    },
+
+    periodos: [{type: mongoose.Schema.Types.ObjectId, ref: 'periodos'}]
+})
+
 
 const Usuario = mongoose.model('users', userSchema);
 const Docente = mongoose.model('docentes', userProfesore);
 const Periodo = mongoose.model('periodos', periodoSchema);
 const Clase = mongoose.model('clases', clasesSchama);
 const Salon = mongoose.model('salones', salonSchema);
+const Grado = mongoose.model('grados', gradoSchema);
+const Letivo = mongoose.model('letivos', añoLetivoSchama);
 
 module.exports = {
     Usuario,
     Docente,
     Periodo,
     Clase,
-    Salon
+    Salon,
+    Grado,
+    Letivo
 }

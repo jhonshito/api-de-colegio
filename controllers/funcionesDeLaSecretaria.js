@@ -1,34 +1,53 @@
-const { Periodo, Clase, Salon, Docente, Usuario } = require('../models/models');
+const { Periodo, Clase, Salon, Docente, Usuario, Grado, Letivo } = require('../models/models');
 const transporter = require("../config/mailer")
 const moment = require('moment');
 
 // crear periodo
 const agregarPeriodo = (req, res) => {
-    const { nombre, inicio, fin } = req.body;
+    const { nombre, inicio, fin, idLetivo } = req.body;
 
     const role = req.userRole
 
     const fechaInicio = moment(inicio, 'YYYY-MM-DD').toDate();
     const fechaFin = moment(fin, 'YYYY-MM-DD').toDate(); 
-    console.log(fechaInicio); 
-    console.log(fechaFin); 
-
+    console.log(idLetivo)
     if(role !== 'estudiante'){
 
-        const periodo = new Periodo({nombre: nombre, inicio: fechaInicio, fin: fechaFin});
-        periodo.save().then((periodos) => {
-            if(periodos){
-                res.status(200).json({
-                    mensaje: 'Periodo agregado',
-                    periodos
+        Letivo.findById(idLetivo).then((letivo) => {
+            if(letivo){
+
+                const periodo = new Periodo({nombre: nombre, inicio: fechaInicio, fin: fechaFin});
+                periodo.save().then((periodos) => {
+                    if(periodos){
+                        letivo.periodos.push(periodos._id)
+                        letivo.save().then(() => {
+                            res.status(200).json({
+                                mensaje: 'Periodo agregado',
+                                periodos
+                            })
+                        })
+                    }else {
+                        res.status(404).json({
+                            mensaje: 'no se pudo agregar el periodo '
+                        })
+                    }
                 })
+                .catch((e) => res.json(e))
+
             }else {
                 res.status(404).json({
-                    mensaje: 'no se pudo agregar el periodo '
+                    status: 400,
+                    mensaje: 'No exites el año lectivo seleccionado'
                 })
             }
         })
-        .catch((e) => res.json(e))
+        .catch((e) => {
+            res.status(500).json({
+                status: 500,
+                mensaje: 'Error al buscar el año letivo',
+                e
+            })
+        })
 
     }else {
         res.status(400).json({
@@ -615,6 +634,135 @@ const allSalones = (req, res) => {
     }
 }
 
+// crear grado
+const crearGrado = async(req, res) => {
+
+    const { nombre, director_de_grupo, estudiantes } = req.body
+
+    const role = req.userRole
+
+    if(role == 'secretaria'){
+
+        const itemGrado =  await Grado.findOne({ nombre: nombre })
+        if(itemGrado){
+           return res.status(400).json({
+                status: 400,
+                mensaje: 'Ya existe grado con este nombre'
+            })
+        }
+        const nuevoGrado = new Grado({
+            nombre: nombre,
+            director_de_grupo: director_de_grupo,
+            estudiantes: estudiantes
+        })
+
+        nuevoGrado.save().then((grado) => {
+            if(!grado) {
+                console.log(err)
+                res.status(500).json({
+                    status: 500,
+                    mensaje: 'Ha ocurrido un error al guardar el grado en la base de datos'
+                })
+            } else {
+                res.status(200).json({
+                    status: 200,
+                    mensaje: 'Grado guardado correctamente en la base de datos',
+                    grado: grado
+                })
+            }
+        })
+        .catch((e) => {
+            console.log(e);
+            res.status(500).json({
+              status: 500,
+              mensaje: 'Error al crear el grado',
+              e
+            })
+        })
+
+    } else {
+        res.status(400).json({
+            status: 400,
+            mensaje: 'No puedes acceder a esta funcion'
+        })
+    }
+}
+
+// crear año letivo
+const crearAñoLetivo = (req, res) => {
+
+    const { nombre, inicio, fin, jornada } = req.body
+    const role = req.userRole
+
+    if(role == 'secretaria'){
+
+        const añoLetivo = new Letivo({
+            nombre: nombre,
+            inicio: inicio,
+            fin: fin,
+            jornada: jornada
+        })
+
+        añoLetivo.save().then((letivo) => {
+            if(letivo){
+                res.status(200).json({
+                    status: 200,
+                    mensaje: 'año letivo creado exitosamente',
+                    letivo
+                })
+            }else {
+                res.status(404).json({
+                    status: 404,
+                    mensaje: 'No se pudo crear el año letivo'
+                })
+            }
+        })
+        .catch((e) => {
+            res.status(500).json({
+                status: 500,
+                mensaje: 'Error al crear el año letivo',
+                e
+            })
+        })
+
+    }else {
+        res.status(400).json({
+            status: 400,
+            mensaje: 'No puedes acceder a esta funcion'
+        })
+    }
+}
+
+// traer años letivos
+const letivos = (req, res) => {
+
+    const role = req.userRole
+
+    if(role == 'secretaria'){
+
+        Letivo.find().populate('periodos').then((letivos) => {
+            if(letivos){
+                res.status(200).json({
+                    status: 200,
+                    mensaje: 'Años letivos',
+                    años_letivos: letivos
+                })
+            }else {
+                res.status(400).json({
+                    status: 400,
+                    mensaje: 'No hay años letivos actualmente'
+                })
+            }
+        })
+
+    }else {
+        res.status(400).json({
+            status: 400,
+            mensaje: 'No puedes acceder a esta funcion'
+        })
+    }
+}
+
 module.exports = {
     agregarPeriodo,
     agregarClase,
@@ -630,5 +778,8 @@ module.exports = {
     matricular,
     rechazarAspirante,
     allDocentes,
-    allSalones
+    allSalones,
+    crearGrado,
+    crearAñoLetivo,
+    letivos
 }
