@@ -462,10 +462,8 @@ const fechaRegistro = (req, res) => {
 // matricular al aspirante a estudiante y enviarle el correo de confimacion de la matricula
 const matricular = (req, res) => {
 
-    const { texto, id } = req.body
+    const { texto, id, idLetivo } = req.body
     const role = req.userRole
-
-    console.log(texto,   id)
 
     if(role == 'secretaria'){
         Usuario.findById(id).then((user) => {
@@ -473,20 +471,52 @@ const matricular = (req, res) => {
 
                 user.matricula = true
                 user.save().then(() => {
-                    transporter.sendMail({
-                        from: '"MATRICULA" <Secretaria>', // sender address
-                        to: user.correo, // list of receivers
-                        subject: "HASIDO MATRICULADO EN NUESTRA AULA", // Subject line
-                        html: `
-                        <p>${texto}:</p>
-                        <br><br>
-                        <img src="https://losmejorescolegios.com/wp-content/uploads/2022/05/cuadrada.jpg" style="width: 200px; heigth: 100px;" alt="Descripción de la imagen">
-                          `
-                    });
-
-                    res.status(200).json({
-                        status: 200,
-                        mensaje: 'email de confirmacion enviado'
+                    Letivo.findById(idLetivo).then((letivo) => {
+                        if(letivo){
+                            letivo.estudiantes.push(user._id)
+                            letivo.save().then((añosLetivos) => {
+                                if(añosLetivos){
+                                    transporter.sendMail({
+                                        from: '"MATRICULA" <Secretaria>', // sender address
+                                        to: user.correo, // list of receivers
+                                        subject: "HASIDO MATRICULADO EN NUESTRA AULA", // Subject line
+                                        html: `
+                                        <p>${texto}:</p>
+                                        <br><br>
+                                        <img src="https://losmejorescolegios.com/wp-content/uploads/2022/05/cuadrada.jpg" style="width: 200px; heigth: 100px;" alt="Descripción de la imagen">
+                                          `
+                                    });
+                
+                                    res.status(200).json({
+                                        status: 200,
+                                        mensaje: 'email de confirmacion enviado'
+                                    })
+                                }else {
+                                    res.status(404).json({
+                                        status: 404,
+                                        mensaje: 'No se pudo guardar'
+                                    })
+                                }
+                            })
+                        }else {
+                            res.status(404).json({
+                                status: 404,
+                                mensaje: 'No se encontro los año letivo seleccionado'
+                            })
+                        }
+                    })
+                    .catch((e) => {
+                        res.status(500).json({
+                            status: 500,
+                            mensaje: 'Error al buscar el año letivo',
+                            e
+                        })
+                    })
+                })
+                .catch((e) => {
+                    res.status(500).json({
+                        status: 500,
+                        mensaje: 'Error al guardar los cambios del aspirante'
                     })
                 })
 
@@ -763,6 +793,43 @@ const letivos = (req, res) => {
     }
 }
 
+// traer a todos lo periodos del año letivo seleccionado
+const periodosDeLosAñosLetivos = (req, res) => {
+    const { idLetivo } = req.params
+    const role = req.userRole
+
+    if(role == 'secretaria'){
+
+        Letivo.findById(idLetivo).populate('periodos').then((letivo) => {
+            if(letivo){
+                res.status(200).json({
+                    status: 200,
+                    mensaje: 'periodos',
+                    periodos: letivo.periodos
+                })
+            }else {
+                res.status(404).json({
+                    status: 404,
+                    mensaje: 'No existe año letivo que seleccionaste'
+                })
+            }
+        })
+        .catch((e) => {
+            res.status(500).json({
+                status: 500,
+                mensaje: 'Error al buscar el año letivo',
+                e
+            })
+        })
+
+    }else {
+        res.status(400).json({
+            status: 400,
+            mensaje: 'No puedes acceder a esta funcion'
+        })
+    }
+}
+
 module.exports = {
     agregarPeriodo,
     agregarClase,
@@ -781,5 +848,6 @@ module.exports = {
     allSalones,
     crearGrado,
     crearAñoLetivo,
-    letivos
+    letivos,
+    periodosDeLosAñosLetivos
 }

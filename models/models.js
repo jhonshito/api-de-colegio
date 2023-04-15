@@ -198,7 +198,8 @@ const añoLetivoSchama = new Schema({
         required: true
     },
 
-    periodos: [{type: mongoose.Schema.Types.ObjectId, ref: 'periodos'}]
+    periodos: [{type: mongoose.Schema.Types.ObjectId, ref: 'periodos'}],
+    estudiantes: [{type: mongoose.Schema.Types.ObjectId, ref: 'users'}]
 })
 
 
