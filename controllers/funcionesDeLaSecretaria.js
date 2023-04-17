@@ -1,4 +1,4 @@
-const { Periodo, Clase, Salon, Docente, Usuario, Grado, Letivo } = require('../models/models');
+const { Periodo, Clase, Salon, Docente, Usuario, Grado, Letivo, Materia, Asignatura } = require('../models/models');
 const transporter = require("../config/mailer")
 const moment = require('moment');
 
@@ -763,6 +763,195 @@ const crearAñoLetivo = (req, res) => {
     }
 }
 
+// crear materias y agregarlas al año letivo seleccionado
+const crearMaterias = (req, res) => {
+
+    const { nombre, descripcion, idLetivo } = req.body
+    const role = req.userRole
+    if(role == 'secretaria'){
+
+        switch(true){
+            case !nombre:
+                res.status(400).json({
+                    status: 400,
+                    mensaje: 'El nombre es requerido'
+                })
+                break;
+            case !descripcion:
+                res.status(400).json({
+                    status: 400,
+                    mensaje: 'la descripcion es requerida'
+                })
+                break;
+
+            default:
+
+                const datos = new Materia({nombre: nombre, descripcion: descripcion});
+
+                datos.save().then((materia) => {
+                    if(materia){
+
+                        Letivo.findById(idLetivo).then((letivo) => {
+                            if(letivo){
+                                letivo.materias.push(materia._id)
+                                letivo.save().then((isOk) => {
+                                    if(isOk){
+                                        res.status(200).json({
+                                            status: 200,
+                                            mensaje: 'Materia creada y agregada al año letivo seleccionado',
+                                            materia: materia
+                                        })
+                                    }else {
+                                        res.status(404).json({
+                                            status: 404,
+                                            mensaje: 'No se agrego la materia al año letivo'
+                                        })
+                                    }
+                                })
+                                .catch((e) => {
+                                    res.status(500).json({
+                                        status: 500,
+                                        mensaje: 'Error al agregar la materia al año letivo',
+                                        e
+                                    })
+                                })
+                            }else {
+                                res.status(404).json({
+                                    status: 404,
+                                    mensaje: 'No se puedo encontrar el año letivo seleccionado'
+                                })
+                            }
+                        })
+                        .catch((e) => {
+                            res.status(500).json({
+                                status: 500,
+                                mensaje: 'Error al buscar el año letivo seleccionado',
+                                e
+                            })
+                        })
+
+                    }else {
+                        res.status(404).json({
+                            status: 404,
+                            mensaje: 'No se pudo crear la materia'
+                        })
+                    }
+                })
+                .catch((e) => {
+                    res.status(500).json({
+                        status: 500,
+                        mensaje: 'Error al guardar los datos',
+                        e
+                    })
+                })
+                
+                break;
+        }
+
+    }else {
+        res.status(400).json({
+            status: 400,
+            mensaje: 'No puedes acceder a esta funcion'
+        })
+    }
+}
+
+const crearAsignaturas = (req, res) => {
+
+    const { nombre, descripcion, materias, idLetivo } = req.body 
+    const role = req.userRole
+    if(role == 'secretaria'){
+
+        switch(true){
+            case !nombre:
+                res.status(400).json({
+                    status: 400,
+                    mensaje: 'El campo del nombre es requerido'
+                })
+                break
+            case !descripcion:
+                res.status(400).json({
+                    status: 400,
+                    mensaje: 'El campo de la descripción es requerido'
+                })
+                break
+            case materias.length == 0:
+                res.status(400).json({
+                    status: 400,
+                    mensaje: 'El campo de las materias es requerido'
+                })
+                break
+
+            default:
+
+                const datos = new Asignatura({nombre: nombre, descripcion: descripcion, materias: materias})
+
+                datos.save().then((data) => {
+                    if(data){
+
+                        Letivo.findById(idLetivo).then((letivo) => {
+                            if(letivo){
+                                letivo.asignaturas.push(data._id)
+                                letivo.save().then((isOk) => {
+                                    if(isOk){
+                                        res.status(200).json({
+                                            status: 200,
+                                            mensaje: 'Asignatura creada y agregada al año letivo seleccionado',
+                                            asignaturas: data
+                                        })
+                                    }else {
+                                        res.status(404).json({
+                                            status: 404,
+                                            mensaje: 'No se pudo agregar la asignatura al año letivo seleccionado'
+                                        })
+                                    }
+                                })
+                                .catch((e) => {
+                                    res.status(500).json({
+                                        status: 500,
+                                        mensaje : 'Error al guardar los cambios del año letivo',
+                                        e
+                                    })
+                                })
+                            }else {
+                                res.status(404).json({
+                                    status: 404,
+                                    mensaje: 'No se pudo encontrar el año letivo seleccionado'
+                                })
+                            }
+                        })
+                        .catch((e) => {
+                            res.status(500).json({
+                                status: 500,
+                                mensaje: 'Error al buscar el año letivo seleccionado',
+                                e
+                            })
+                        })
+
+                    }else {
+                        res.status(404).json({
+                            status: 404,
+                            mensaje: 'No se pudo crear la asignatura'
+                        })
+                    }
+                })
+                .catch((e) => {
+                    res.status(500).json({
+                        status: 500,
+                        mensaje: 'Error al crear la nueva asignatura',
+                        e
+                    })
+                })
+                break;
+        }
+    }else {
+        res.status(400).json({
+            status: 400,
+            mensaje: 'No puedes acceder a esta función'
+        })
+    }
+}
+
 // traer años letivos
 const letivos = (req, res) => {
 
@@ -849,5 +1038,7 @@ module.exports = {
     crearGrado,
     crearAñoLetivo,
     letivos,
-    periodosDeLosAñosLetivos
+    periodosDeLosAñosLetivos,
+    crearMaterias,
+    crearAsignaturas
 }

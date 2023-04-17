@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { register, login, perfil, cambiarContraseña, contraseñaCambiada } = require('../controllers/home.controller');
 const { listGrado } = require("../controllers/funcionesDelDocente");
 const verificarToken = require('../controllers/verificarToken');
-const { agregarPeriodo, agregarClase, periodos, clases, agregarDocenteAlaClase, crearSalon, agregarDirectorDelSalon, agregarEstudiantesAlSalon, traerEstudiantesDelSalon, estudiantes, fechaRegistro, matricular, rechazarAspirante, allDocentes, allSalones, crearGrado, crearAñoLetivo, letivos, periodosDeLosAñosLetivos } = require('../controllers/funcionesDeLaSecretaria');
+const { agregarPeriodo, agregarClase, periodos, clases, agregarDocenteAlaClase, crearSalon, agregarDirectorDelSalon, agregarEstudiantesAlSalon, traerEstudiantesDelSalon, estudiantes, fechaRegistro, matricular, rechazarAspirante, allDocentes, allSalones, crearGrado, crearAñoLetivo, letivos, periodosDeLosAñosLetivos, crearMaterias, crearAsignaturas } = require('../controllers/funcionesDeLaSecretaria');
 
 const router = Router();
 
@@ -31,4 +31,6 @@ router.post('/crearGrado', verificarToken, crearGrado);
 router.post('/letivo', verificarToken, crearAñoLetivo);
 router.get('/letivosGet', verificarToken, letivos);
 router.get('/periodosForLetivos/:idLetivo', verificarToken, periodosDeLosAñosLetivos);
+router.post('/crearMaterias', verificarToken, crearMaterias);
+router.post('/crearAsignaturas', verificarToken, crearAsignaturas);
 module.exports = router

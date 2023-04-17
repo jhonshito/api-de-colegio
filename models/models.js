@@ -199,9 +199,34 @@ const añoLetivoSchama = new Schema({
     },
 
     periodos: [{type: mongoose.Schema.Types.ObjectId, ref: 'periodos'}],
-    estudiantes: [{type: mongoose.Schema.Types.ObjectId, ref: 'users'}]
+    estudiantes: [{type: mongoose.Schema.Types.ObjectId, ref: 'users'}],
+    materias: [{type: mongoose.Schema.Types.ObjectId, ref: 'materias'}],
+    asignaturas: [{type: mongoose.Schema.Types.ObjectId, ref: 'asignaturas'}]
 })
 
+const materiasSchema = new Schema({
+    nombre: {
+        type: String,
+    },
+    descripcion: {
+        type: String
+    }
+})
+
+const asignaturasSchema = new Schema({
+    nombre: {
+        type: String
+    },
+    descripcion: {
+        type: String
+    },
+    materias: {
+        type: Array
+    }
+})
+
+const Materia = mongoose.model('materias', materiasSchema);
+const Asignatura = mongoose.model('asignaturas', asignaturasSchema);
 
 const Usuario = mongoose.model('users', userSchema);
 const Docente = mongoose.model('docentes', userProfesore);
@@ -218,5 +243,7 @@ module.exports = {
     Clase,
     Salon,
     Grado,
-    Letivo
+    Letivo,
+    Materia,
+    Asignatura
 }
