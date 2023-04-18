@@ -766,7 +766,7 @@ const crearAñoLetivo = (req, res) => {
 // crear materias y agregarlas al año letivo seleccionado
 const crearMaterias = (req, res) => {
 
-    const { nombre, descripcion, idLetivo } = req.body
+    const { nombre, descripcion, idLetivo, tipo } = req.body
     const role = req.userRole
     if(role == 'secretaria'){
 
@@ -783,10 +783,16 @@ const crearMaterias = (req, res) => {
                     mensaje: 'la descripcion es requerida'
                 })
                 break;
+            case !idLetivo:
+                res.status(400).json({
+                    status: 400,
+                    mensaje: 'el campo del es requerida'
+                })
+                break;
 
             default:
 
-                const datos = new Materia({nombre: nombre, descripcion: descripcion});
+                const datos = new Materia({nombre: nombre, descripcion: descripcion, tipo: tipo});
 
                 datos.save().then((materia) => {
                     if(materia){
@@ -856,9 +862,10 @@ const crearMaterias = (req, res) => {
     }
 }
 
+// crear asignaturas
 const crearAsignaturas = (req, res) => {
 
-    const { nombre, descripcion, materias, idLetivo } = req.body 
+    const { nombre, descripcion, materias, idLetivo, tipo } = req.body 
     const role = req.userRole
     if(role == 'secretaria'){
 
@@ -884,7 +891,7 @@ const crearAsignaturas = (req, res) => {
 
             default:
 
-                const datos = new Asignatura({nombre: nombre, descripcion: descripcion, materias: materias})
+                const datos = new Asignatura({nombre: nombre, descripcion: descripcion, materias: materias, tipo: tipo})
 
                 datos.save().then((data) => {
                     if(data){
@@ -1019,6 +1026,78 @@ const periodosDeLosAñosLetivos = (req, res) => {
     }
 }
 
+// traer todas las materias creadas
+const materiasCreadas = (req, res) => {
+
+    const role = req.userRole
+    if(role == 'secretaria'){
+
+        Materia.find().then((materias) => {
+            if(materias){
+                res.status(200).json({
+                    status: 200,
+                    mensaje: 'materias',
+                    materias
+                })
+            }else {
+                res.status(404).json({
+                    status: 404,
+                    mensaje: 'No hay materias creadas'
+                })
+            }
+        })
+        .catch((e) => {
+            res.status(500).json({
+                status: 500,
+                mensaje: 'Error la buscar las materias creadas',
+                e
+            })
+        })
+
+    }else {
+        res.status(400).json({
+            status: 400,
+            mensaje: 'No puedes acceder a esta funcion'
+        })
+    }
+}
+
+// traer todas la asignaturas
+const asignaturasCreadas = (req, res) => {
+
+    const role = req.userRole
+    if(role == 'secretaria'){
+
+        Asignatura.find().then((data) => {
+            if(data){
+                res.status(200).json({
+                    status: 200,
+                    mensaje: 'asignaturas', 
+                    asignaturas: data
+                })
+            }else {
+                res.status(404).json({
+                    status: 404,
+                    mensaje: 'No hay asignaturas creadas'
+                })
+            }
+        })
+        .catch((e) => {
+            res.status(500).json({
+                status: 500,
+                mensaje: 'Error al buscar las asignaturas creadas',
+                e
+            })
+        })
+
+    }else {
+        res.status(400).json({
+            status: 400,
+            mensaje: 'No puedes acceder a esta funcion'
+        })
+    }
+}
+
 module.exports = {
     agregarPeriodo,
     agregarClase,
@@ -1040,5 +1119,7 @@ module.exports = {
     letivos,
     periodosDeLosAñosLetivos,
     crearMaterias,
-    crearAsignaturas
+    crearAsignaturas,
+    materiasCreadas,
+    asignaturasCreadas
 }
