@@ -209,10 +209,6 @@ const materiasSchema = new Schema({
         type: String,
     },
 
-    descripcion: {
-        type: String
-    },
-
     tipo: {
         type: String
     }
@@ -220,9 +216,6 @@ const materiasSchema = new Schema({
 
 const asignaturasSchema = new Schema({
     nombre: {
-        type: String
-    },
-    descripcion: {
         type: String
     },
     materias: {

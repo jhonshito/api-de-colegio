@@ -766,7 +766,7 @@ const crearAñoLetivo = (req, res) => {
 // crear materias y agregarlas al año letivo seleccionado
 const crearMaterias = (req, res) => {
 
-    const { nombre, descripcion, idLetivo, tipo } = req.body
+    const { nombre, idLetivo, tipo } = req.body
     const role = req.userRole
     if(role == 'secretaria'){
 
@@ -775,12 +775,6 @@ const crearMaterias = (req, res) => {
                 res.status(400).json({
                     status: 400,
                     mensaje: 'El nombre es requerido'
-                })
-                break;
-            case !descripcion:
-                res.status(400).json({
-                    status: 400,
-                    mensaje: 'la descripcion es requerida'
                 })
                 break;
             case !idLetivo:
@@ -792,7 +786,7 @@ const crearMaterias = (req, res) => {
 
             default:
 
-                const datos = new Materia({nombre: nombre, descripcion: descripcion, tipo: tipo});
+                const datos = new Materia({nombre: nombre, tipo: tipo});
 
                 datos.save().then((materia) => {
                     if(materia){
@@ -865,7 +859,7 @@ const crearMaterias = (req, res) => {
 // crear asignaturas
 const crearAsignaturas = (req, res) => {
 
-    const { nombre, descripcion, materias, idLetivo, tipo } = req.body 
+    const { nombre, materias, idLetivo, tipo } = req.body 
     const role = req.userRole
     if(role == 'secretaria'){
 
@@ -874,12 +868,6 @@ const crearAsignaturas = (req, res) => {
                 res.status(400).json({
                     status: 400,
                     mensaje: 'El campo del nombre es requerido'
-                })
-                break
-            case !descripcion:
-                res.status(400).json({
-                    status: 400,
-                    mensaje: 'El campo de la descripción es requerido'
                 })
                 break
             case materias.length == 0:
@@ -891,7 +879,7 @@ const crearAsignaturas = (req, res) => {
 
             default:
 
-                const datos = new Asignatura({nombre: nombre, descripcion: descripcion, materias: materias, tipo: tipo})
+                const datos = new Asignatura({nombre: nombre, materias: materias, tipo: tipo})
 
                 datos.save().then((data) => {
                     if(data){
