@@ -78,7 +78,6 @@ const userSchema = new Schema({
     }
 });
 
-
 // registro de Docentes
 const userProfesore = new Schema({
     nombreCompleto: {
@@ -114,7 +113,7 @@ const userProfesore = new Schema({
         type: String,
         required: true
     },
-    materias: [],
+    materias: [{type: mongoose.Schema.Types.ObjectId, ref: 'materias'}],
     años_de_experiencia: {
         type: String,
         required: true

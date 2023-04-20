@@ -599,7 +599,7 @@ const allDocentes = (req, res) => {
     const role = req.userRole
 
     if(role == 'secretaria'){
-        Docente.find({role: 'profesor'}).then((usuarios) => {
+        Docente.find({role: 'profesor'}).populate('materias').then((usuarios) => {
             if(usuarios){
                 res.status(200).json({
                     status: 200,
@@ -1086,6 +1086,57 @@ const asignaturasCreadas = (req, res) => {
     }
 }
 
+// agregar materia a los profesores
+const addMateria = (req, res) => {
+    const { docenteId, materiaId } = req.body
+    const role = req.userRole
+
+    if(role == 'secretaria'){
+        Docente.findById(docenteId).then((docente) => {
+            if(docente){
+                docente.materias.push(materiaId)
+                docente.save().then((isOk) => {
+                    if(isOk){
+                        res.status(200).json({
+                            status: 200,
+                            mensaje: 'is ok'
+                        })
+                    }else {
+                        res.status(404).json({
+                            status: 404,
+                            mensaje: 'No se pudo agregar la materia o la asignatura'
+                        })
+                    }
+                })
+                .catch((e) => {
+                    res.status(500).json({
+                        status: 500,
+                        mensaje: 'Fallo al agregar la materia o la asignatura al docente',
+                        e
+                    })
+                })
+            }else {
+                res.status(404).json({
+                    status: 404,
+                    mensaje: 'No existe el docente que seleccionaste'
+                })
+            }
+        })
+        .catch((e) => {
+            res.status(500).json({
+                status: 500,
+                mensaje: 'Error al buscar al docente seleccionado',
+                e
+            })
+        })
+    }else {
+        res.status(400).json({
+            status: 400,
+            mensaje: 'No puedes acceder a esta función'
+        })
+    }
+}
+
 module.exports = {
     agregarPeriodo,
     agregarClase,
@@ -1109,5 +1160,6 @@ module.exports = {
     crearMaterias,
     crearAsignaturas,
     materiasCreadas,
-    asignaturasCreadas
+    asignaturasCreadas,
+    addMateria
 }
