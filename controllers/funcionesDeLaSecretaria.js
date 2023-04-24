@@ -688,7 +688,7 @@ const crearGrado = async(req, res) => {
 
         nuevoGrado.save().then((grado) => {
             if(!grado) {
-                console.log(err)
+                // console.log(err)
                 res.status(500).json({
                     status: 500,
                     mensaje: 'Ha ocurrido un error al guardar el grado en la base de datos'
@@ -702,7 +702,7 @@ const crearGrado = async(req, res) => {
             }
         })
         .catch((e) => {
-            console.log(e);
+            // console.log(e);
             res.status(500).json({
               status: 500,
               mensaje: 'Error al crear el grado',
@@ -714,6 +714,40 @@ const crearGrado = async(req, res) => {
         res.status(400).json({
             status: 400,
             mensaje: 'No puedes acceder a esta funcion'
+        })
+    }
+}
+
+// traer a todos los grados
+const allGrados = (req, res) => {
+
+    const role = req.userRole
+    if(role == 'secretaria'){
+        Grado.find().populate('director_de_grupo').populate('estudiantes').then((grados) => {
+            if(grados){
+                res.status(200).json({
+                    status: 200,
+                    mensaje: 'Grados encontrados',
+                    grados
+                })
+            }else {
+                res.status(404).json({
+                    status: 404,
+                    mensaje: 'No hay grados actualmente'
+                })
+            }
+        })
+        .catch((e) => {
+            res.status(500).json({
+                status: 500,
+                mensaje: 'Error al traer todos los grados',
+                e
+            })
+        })
+    }else {
+        res.status(400).json({
+            status: 400,
+            mensaje: 'No puedes acceder a esta función'
         })
     }
 }
@@ -1161,5 +1195,6 @@ module.exports = {
     crearAsignaturas,
     materiasCreadas,
     asignaturasCreadas,
-    addMateria
+    addMateria,
+    allGrados
 }
