@@ -1171,6 +1171,76 @@ const addMateria = (req, res) => {
     }
 }
 
+// agregar asignatura a los profesores
+const addAsignatura = (req, res) => {
+
+    const { docenteId, asignaturaId } = req.body
+
+    const role = req.userRole
+    if(role == 'secretaria'){
+
+        Docente.findById(docenteId).then((docente) => {
+            if(docente){
+                Asignatura.findById(asignaturaId).then((asignatura) => {
+                    if(asignatura){
+                        docente.asignatura = asignatura._id
+                        docente.save().then((isOk) => {
+                            if(isOk){
+                                res.status(200).json({
+                                    status: 200,
+                                    mensaje: 'Asignatura agregada exitosamente'
+                                })
+                            }else {
+                                res.status(404).json({
+                                    status: 404,
+                                    mensaje: 'No se pudo asignale la asignatura al docente seleccionado'
+                                })
+                            }
+                        })
+                        .catch((e) => {
+                            res.status(500).json({
+                                status: 500,
+                                mensaje: 'Error al guardar los datos de la asignatura',
+                                e
+                            })
+                        })
+                    }else {
+                        res.status(404).json({
+                            status: 404,
+                            mensaje: 'La asignatura seleccionada no existe'
+                        })
+                    }
+                })
+                .catch((e) => {
+                    res.status(500).json({
+                        status: 500,
+                        mensaje: 'Error al buscar la asgnatura',
+                        e
+                    })
+                })
+            }else {
+                res.status(404).json({
+                    status: 404,
+                    mensaje: 'El docente seleccionado no existe'
+                })
+            }
+        })
+        .catch((e) => {
+            res.status(500).json({
+                status: 500,
+                mensaje: 'Error al buscar al docente',
+                e
+            })
+        })
+
+    }else {
+        res.status(400).json({
+            status: 400,
+            mensaje: 'No puedes acceder a esta función'
+        })
+    }
+}
+
 module.exports = {
     agregarPeriodo,
     agregarClase,
@@ -1196,5 +1266,6 @@ module.exports = {
     materiasCreadas,
     asignaturasCreadas,
     addMateria,
-    allGrados
+    allGrados,
+    addAsignatura
 }

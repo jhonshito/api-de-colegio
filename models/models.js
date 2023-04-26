@@ -113,7 +113,8 @@ const userProfesore = new Schema({
         type: String,
         required: true
     },
-    materias: [{type: mongoose.Schema.Types.ObjectId, ref: 'materias'}],
+    materias: {type: mongoose.Schema.Types.ObjectId, ref: 'materias'},
+    asignatura: {type: mongoose.Schema.Types.ObjectId, ref: 'asignaturas'},
     años_de_experiencia: {
         type: String,
         required: true

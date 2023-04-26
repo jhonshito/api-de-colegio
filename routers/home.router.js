@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { register, login, perfil, cambiarContraseña, contraseñaCambiada } = require('../controllers/home.controller');
 const { listGrado } = require("../controllers/funcionesDelDocente");
 const verificarToken = require('../controllers/verificarToken');
-const { agregarPeriodo, agregarClase, periodos, clases, agregarDocenteAlaClase, crearSalon, agregarDirectorDelSalon, agregarEstudiantesAlSalon, traerEstudiantesDelSalon, estudiantes, fechaRegistro, matricular, rechazarAspirante, allDocentes, allSalones, crearGrado, crearAñoLetivo, letivos, periodosDeLosAñosLetivos, crearMaterias, crearAsignaturas, materiasCreadas, asignaturasCreadas, addMateria, allGrados } = require('../controllers/funcionesDeLaSecretaria');
+const { agregarPeriodo, agregarClase, periodos, clases, agregarDocenteAlaClase, crearSalon, agregarDirectorDelSalon, agregarEstudiantesAlSalon, traerEstudiantesDelSalon, estudiantes, fechaRegistro, matricular, rechazarAspirante, allDocentes, allSalones, crearGrado, crearAñoLetivo, letivos, periodosDeLosAñosLetivos, crearMaterias, crearAsignaturas, materiasCreadas, asignaturasCreadas, addMateria, allGrados, addAsignatura } = require('../controllers/funcionesDeLaSecretaria');
 
 const router = Router();
 
@@ -36,5 +36,6 @@ router.post('/crearAsignaturas', verificarToken, crearAsignaturas);
 router.get('/materiasCreadas', verificarToken, materiasCreadas);
 router.get('/asignaturasCreadas', verificarToken, asignaturasCreadas);
 router.put('/addMateria', verificarToken, addMateria);
+router.put('/addAsignatura', verificarToken, addAsignatura);
 router.get('/allGrados', verificarToken, allGrados);
 module.exports = router
