@@ -423,16 +423,16 @@ const estudiantes = (req, res) => {
     }
 }
 
-// Estudiantes matriculados los ultimos 7 dias
+// traer a los aspirantes a matricula
 const fechaRegistro = (req, res) => {
     const role = req.userRole
 
     if(role == 'secretaria'){
 
         const hoy = new Date()
-        const haceSieteDias = new Date(hoy.getTime() - (7 * 24 * 60 * 60 * 1000))
+        // const haceSieteDias = new Date(hoy.getTime() - (7 * 24 * 60 * 60 * 1000))
 
-        Usuario.find({ fechaRegistro: { $gte: haceSieteDias }, matricula: false }).sort({$natural:-1}).then((user) => { // Agregar condición de búsqueda y sort() aquí
+        Usuario.find({ matricula: false }).sort({$natural:-1}).then((user) => { // Agregar condición de búsqueda y sort() aquí
 
             if(user){
                 res.status(200).json({
@@ -599,7 +599,7 @@ const allDocentes = (req, res) => {
     const role = req.userRole
 
     if(role == 'secretaria'){
-        Docente.find({role: 'profesor'}).populate('materias').then((usuarios) => {
+        Docente.find({role: 'profesor'}).populate('materias').populate('asignatura').then((usuarios) => {
             if(usuarios){
                 res.status(200).json({
                     status: 200,
@@ -1128,12 +1128,12 @@ const addMateria = (req, res) => {
     if(role == 'secretaria'){
         Docente.findById(docenteId).then((docente) => {
             if(docente){
-                docente.materias.push(materiaId)
+                docente.materias = materiaId
                 docente.save().then((isOk) => {
                     if(isOk){
                         res.status(200).json({
                             status: 200,
-                            mensaje: 'is ok'
+                            mensaje: 'Materia agregada'
                         })
                     }else {
                         res.status(404).json({
