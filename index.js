@@ -17,4 +17,4 @@ app.use(express.json());
 app.use(urlencoded({extended: true}));
 app.use('/', require('./routers/home.router'));
 
-app.listen(4000, console.log('servidor andando'))
+app.listen(process.env.PORT || 4000, console.log('servidor andando ',  process.env.PORT || 4000))
